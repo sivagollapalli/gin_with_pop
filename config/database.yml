@@ -1,0 +1,7 @@
+development:
+  dialect: "postgres"
+  database: "gin_with_pop_dev"
+  host: "localhost"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
