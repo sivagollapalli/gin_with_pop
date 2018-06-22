@@ -17,7 +17,7 @@ type User struct {
 	UpdatedAt      time.Time `json:"-" db:"updated_at"`
 	Name           string    `json:"name" db:"name"`
 	Email          string    `json:"email" db:"email"`
-	PasswordDigest string    `json:"password_digest" db:"password_digest"`
+	PasswordDigest string    `json:"-" db:"password_digest"`
 }
 
 // String is not required by pop and may be deleted
@@ -59,4 +59,10 @@ func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 func (u User) HashPwd(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
+}
+
+func (u User) Authenticate(password string) bool {
+	digest := []byte(u.PasswordDigest)
+	err := bcrypt.CompareHashAndPassword(digest, []byte(password))
+	return err == nil
 }

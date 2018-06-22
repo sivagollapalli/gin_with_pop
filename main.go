@@ -10,6 +10,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	pop.Debug = true
 	db, err := pop.Connect("development")
 
 	if err != nil {
@@ -47,12 +48,12 @@ func main() {
 	})
 
 	r.GET("/users", func(c *gin.Context) {
-		query := db.RawQuery("select id, name, email, password_digest from users")
+		query := db.RawQuery("select id, name, email from users")
 		users := []models.User{}
 		err := query.All(&users)
 
 		if err != nil {
-			log.Panic(err)
+			log.Println(err)
 		}
 
 		c.JSON(200, users)
@@ -92,6 +93,23 @@ func main() {
 			"name":  user.Name,
 			"email": user.Email})
 
+	})
+	r.POST("/users/sign_in", func(c *gin.Context) {
+		user := models.User{}
+		email := c.Query("email")
+		query := db.RawQuery("select * from users where email = ?", email)
+
+		if err := query.First(&user); err != nil {
+			log.Println(err)
+			c.JSON(422, gin.H{"error": "User doesn't exists"})
+			return
+		}
+
+		if user.Authenticate(c.Query("password")) {
+			c.JSON(200, gin.H{"msg": "login success"})
+		} else {
+			c.JSON(422, gin.H{"msg": "login fail"})
+		}
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
