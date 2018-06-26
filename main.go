@@ -2,99 +2,95 @@ package main
 
 import (
 	"log"
+	"time"
 
+	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/pop"
+	"github.com/sivagollapalli/gin_with_pop/actions"
 	"github.com/sivagollapalli/gin_with_pop/models"
 )
 
 func main() {
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 	pop.Debug = true
-	db, err := pop.Connect("development")
+	db, _ := pop.Connect("development")
 
-	if err != nil {
-		log.Panic(err)
+	authMiddleware := &jwt.GinJWTMiddleware{
+		Realm:            "test zone",
+		SigningAlgorithm: "HS512",
+		Key:              []byte("secret key"),
+		Timeout:          time.Hour * 24,
+		MaxRefresh:       time.Hour * 24,
+		PayloadFunc: func(data interface{}) jwt.MapClaims {
+			claims := make(map[string]interface{})
+			claims["userId"] = data
+			return claims
+		},
+		Authenticator: func(email string, password string, c *gin.Context) (interface{}, bool) {
+			user := models.User{}
+
+			query := db.RawQuery("select * from users where email = ?", email)
+
+			if err := query.First(&user); err != nil {
+				log.Println(err)
+				return nil, false
+			}
+			if user.Authenticate(password) {
+				return &models.User{
+					ID: user.ID,
+				}, true
+			}
+
+			return nil, false
+		},
+		Authorizator: func(user interface{}, c *gin.Context) bool {
+			log.Println(user)
+			if _, ok := user.(string); ok {
+				return true
+			}
+
+			return false
+		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.JSON(code, gin.H{
+				"code":    code,
+				"message": message,
+			})
+		},
+		// TokenLookup is a string in the form of "<source>:<name>" that is used
+		// to extract token from the request.
+		// Optional. Default value "header:Authorization".
+		// Possible values:
+		// - "header:<name>"
+		// - "query:<name>"
+		// - "cookie:<name>"
+		TokenLookup: "header:Authorization",
+		// TokenLookup: "query:token",
+		// TokenLookup: "cookie:token",
+
+		// TokenHeadName is a string in the header. Default value is "Bearer"
+		TokenHeadName: "Bearer",
+
+		// TimeFunc provides the current time. You can override it to use another time value. This is useful for testing or if your server uses a different time zone than your tokens.
+		TimeFunc: time.Now,
 	}
-	r.POST("/users", func(c *gin.Context) {
 
-		user := models.User{
-			Name:  c.Query("name"),
-			Email: c.Query("email")}
+	r.POST("/users/sign_in", authMiddleware.LoginHandler)
 
-		verrs, err := user.Validate(db)
+	auth := r.Group("/")
 
-		if err != nil {
-			log.Panic(err)
-		}
+	auth.Use(authMiddleware.MiddlewareFunc())
+	{
+		auth.POST("/users", actions.CreateUser)
+		auth.GET("/users", actions.ListUsers)
+		auth.GET("/users/:id", actions.ShowUser)
+		auth.PATCH("/users/:id", actions.UpdateUser)
+	}
 
-		if c.Query("password") != c.Query("password_confirmation") {
-			verrs.Add("password", "Password should match")
-		}
-
-		if verrs.HasAny() {
-			c.JSON(422, verrs)
-			return
-		}
-
-		user.PasswordDigest, _ = user.HashPwd(c.Query("password"))
-
-		_, _ = db.ValidateAndSave(&user)
-
-		c.JSON(200, gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email})
-	})
-
-	r.GET("/users", func(c *gin.Context) {
-		query := db.RawQuery("select id, name, email from users")
-		users := []models.User{}
-		err := query.All(&users)
-
-		if err != nil {
-			log.Println(err)
-		}
-
-		c.JSON(200, users)
-	})
-
-	r.GET("/users/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		user := models.User{}
-		if err := db.Find(&user, id); err != nil {
-			log.Println(err)
-			c.JSON(422, gin.H{"error": "user doesnt exists"})
-			return
-		}
-		c.JSON(200, user)
-	})
-	r.PATCH("/users/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		user := models.User{}
-		if err := db.Find(&user, id); err != nil {
-			log.Println(err)
-			c.JSON(422, gin.H{"error": "user doesnt exists"})
-			return
-		}
-
-		user.Name = c.Query("name")
-		user.Email = c.Query("email")
-
-		verrs, _ := db.ValidateAndSave(&user)
-
-		if verrs.HasAny() {
-			c.JSON(422, verrs)
-			return
-		}
-
-		c.JSON(200, gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email})
-
-	})
-	r.POST("/users/sign_in", func(c *gin.Context) {
+	/*r.POST("/users/sign_in", func(c *gin.Context) {
 		user := models.User{}
 		email := c.Query("email")
 		query := db.RawQuery("select * from users where email = ?", email)
@@ -106,10 +102,44 @@ func main() {
 		}
 
 		if user.Authenticate(c.Query("password")) {
-			c.JSON(200, gin.H{"msg": "login success"})
+			log.Println(user)
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+				"identifier": user.ID,
+				"email":      user.Email})
+			tokenString, error := token.SignedString([]byte("secret"))
+
+			if error != nil {
+				fmt.Println(error)
+			}
+			c.JSON(200, gin.H{
+				"msg":   "login success",
+				"token": tokenString})
 		} else {
 			c.JSON(422, gin.H{"msg": "login fail"})
 		}
 	})
+
+	r.GET("/verify", func(c *gin.Context) {
+		tokenParam := c.Query("token")
+
+		token, _ := jwt.Parse(tokenParam, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("There was an error")
+			}
+			return []byte("secret"), nil
+		})
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			var user models.User
+			mapstructure.Decode(claims, &user)
+			log.Println(user)
+			c.JSON(200, gin.H{
+				"id":    user.Identifier,
+				"email": user.Email})
+		} else {
+			c.JSON(422, gin.H{"msg": "Invalid authorization token"})
+		}
+	})*/
+
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

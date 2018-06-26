@@ -11,6 +11,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Claims struct {
+	ID uuid.UUID
+}
+
 type User struct {
 	ID             uuid.UUID `json:"id" db:"id"`
 	CreatedAt      time.Time `json:"-" db:"created_at"`
