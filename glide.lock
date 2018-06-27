@@ -1,5 +1,5 @@
-hash: 29e209b3918d6bb9c5c34cb7f8f3b4f9e2bde18f64cf749dc6e0b83506173986
-updated: 2018-06-27T14:13:09.798071+05:30
+hash: 1c6e872a53b60467dc0c28d3aa22b25014e6c298ac264d78b8343860e7c2bb0b
+updated: 2018-06-27T20:20:38.854342+05:30
 imports:
 - name: github.com/appleboy/gin-jwt
   version: f7347d7c16fc8297bf5b7215b9e4847a5ca05d90
@@ -20,8 +20,24 @@ imports:
   version: 749ddf1598b47e3cd909414bda735fe790ef3d30
 - name: github.com/gobuffalo/envy
   version: 2d0f467653f3d961ce9ada4d32a230bdcb3bfe11
+- name: github.com/gobuffalo/makr
+  version: f3678c71b97a0e678186ab846ebd27fc7a902280
 - name: github.com/gobuffalo/packr
   version: ee34b116572778801ca4a9f6355eda4577cabce8
+- name: github.com/gobuffalo/pop
+  version: fb309e29896c205465f53af10679c52f9ce7c858
+  subpackages:
+  - associations
+  - columns
+  - fizz
+  - fizz/translators
+  - nulls
+- name: github.com/gobuffalo/uuid
+  version: 3a9fb6c5c481d4886f1e9323c61ad743fb955860
+- name: github.com/gobuffalo/validate
+  version: 42d8db6e06e617cdedcc7a849d6690a2cb5a8d28
+  subpackages:
+  - validators
 - name: github.com/golang/protobuf
   version: 9eb2c01ac278a5d89ce4b2be68fe4500955d8179
   subpackages:
@@ -44,17 +60,6 @@ imports:
   - wait
 - name: github.com/markbates/inflect
   version: 84854b5b4c0dbb0c107480d480a71f7db1fc7dae
-- name: github.com/markbates/pop
-  version: 36b03cd832288f82434d4213f4f81d6d31361a07
-  subpackages:
-  - associations
-  - columns
-  - fizz
-  - fizz/translators
-- name: github.com/markbates/validate
-  version: cd8cc34c703420d6b084fbbfd5085e8e71c5b830
-  subpackages:
-  - validators
 - name: github.com/mattn/anko
   version: e82392c5c0b3e0a8120f4e8ad4186ecf66f76873
   subpackages:
@@ -71,8 +76,6 @@ imports:
   version: 25ecb14adfc7543176f7d85291ec7dba82c6f7e4
 - name: github.com/pkg/errors
   version: 816c9085562cd7ee03e7f8188a1cfd942858cded
-- name: github.com/satori/go.uuid
-  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/serenize/snaker
   version: a683aaf2d516deecd70cad0c72e3ca773ecfcef0
 - name: github.com/ugorji/go
@@ -107,6 +110,8 @@ imports:
   - internal/log
   - internal/modules
   - internal/remote_api
+- name: gopkg.in/appleboy/gin-jwt.v2
+  version: f7347d7c16fc8297bf5b7215b9e4847a5ca05d90
 - name: gopkg.in/dgrijalva/jwt-go.v3
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: gopkg.in/go-playground/validator.v8

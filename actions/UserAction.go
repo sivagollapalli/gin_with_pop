@@ -3,9 +3,8 @@ package actions
 import (
 	"log"
 
-	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
-	"github.com/markbates/pop"
+	"github.com/gobuffalo/pop"
 	"github.com/sivagollapalli/gin_with_pop/models"
 )
 
@@ -46,8 +45,7 @@ func CreateUser(c *gin.Context) {
 }
 
 func ListUsers(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	log.Println(claims)
+
 	db, _ := pop.Connect("development")
 	query := db.RawQuery("select id, name, email from users")
 	users := []models.User{}

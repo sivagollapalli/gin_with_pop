@@ -1,17 +1,17 @@
 package: github.com/sivagollapalli/gin_with_pop
 import:
-- package: github.com/appleboy/gin-jwt
+- package: gopkg.in/appleboy/gin-jwt.v2
   version: v2.3.1
 - package: github.com/gin-gonic/gin
   version: v1.2
-- package: github.com/markbates/pop
-  version: v3.60.6
-- package: github.com/markbates/validate
-  version: v1.0.0
+- package: github.com/gobuffalo/pop
+  version: v4.5.10
+- package: github.com/gobuffalo/validate
+  version: v2.0.0
   subpackages:
   - validators
-- package: github.com/satori/go.uuid
-  version: v1.2.0
+- package: github.com/gobuffalo/uuid
+  version: v2.0.0
 - package: golang.org/x/crypto
   subpackages:
   - bcrypt

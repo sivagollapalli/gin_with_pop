@@ -4,12 +4,12 @@ import (
 	"log"
 	"time"
 
-	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
-	"github.com/markbates/pop"
+	"github.com/gobuffalo/pop"
 	"github.com/sivagollapalli/gin_with_pop/actions"
 	"github.com/sivagollapalli/gin_with_pop/models"
 	"google.golang.org/appengine"
+	"gopkg.in/appleboy/gin-jwt.v2"
 )
 
 func main() {
@@ -25,31 +25,32 @@ func main() {
 		Key:              []byte("secret key"),
 		Timeout:          time.Hour * 24,
 		MaxRefresh:       time.Hour * 24,
-		PayloadFunc: func(data interface{}) jwt.MapClaims {
+		PayloadFunc: func(userID string) map[string]interface{} {
 			claims := make(map[string]interface{})
-			claims["userId"] = data
+			claims["email"] = userID
 			return claims
 		},
-		Authenticator: func(email string, password string, c *gin.Context) (interface{}, bool) {
+		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
+			log.Println(userId)
+			log.Println(password)
 			user := models.User{}
+			log.Println(userId)
+			log.Println(password)
 
-			query := db.RawQuery("select * from users where email = ?", email)
+			query := db.RawQuery("select * from users where email = ?", userId)
 
 			if err := query.First(&user); err != nil {
 				log.Println(err)
-				return nil, false
+				return "", false
 			}
 			if user.Authenticate(password) {
-				return &models.User{
-					ID: user.ID,
-				}, true
+				return user.Email, true
 			}
 
-			return nil, false
+			return "", false
 		},
-		Authorizator: func(user interface{}, c *gin.Context) bool {
-			log.Println(user)
-			if _, ok := user.(string); ok {
+		Authorizator: func(userId string, c *gin.Context) bool {
+			if userId != "" {
 				return true
 			}
 
@@ -79,7 +80,7 @@ func main() {
 		TimeFunc: time.Now,
 	}
 
-	r.POST("/users/sign_in", authMiddleware.LoginHandler)
+	r.POST("/login", authMiddleware.LoginHandler)
 
 	auth := r.Group("/")
 
