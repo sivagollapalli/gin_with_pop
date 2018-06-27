@@ -8,7 +8,7 @@ import (
 	"github.com/gobuffalo/pop"
 	"github.com/sivagollapalli/gin_with_pop/actions"
 	"github.com/sivagollapalli/gin_with_pop/models"
-	"google.golang.org/appengine"
+
 	"gopkg.in/appleboy/gin-jwt.v2"
 )
 
@@ -144,5 +144,4 @@ func main() {
 	})*/
 
 	r.Run() // listen and serve on 0.0.0.0:8080
-	appengine.Main()
 }
