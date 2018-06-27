@@ -9,6 +9,7 @@ import (
 	"github.com/markbates/pop"
 	"github.com/sivagollapalli/gin_with_pop/actions"
 	"github.com/sivagollapalli/gin_with_pop/models"
+	"google.golang.org/appengine"
 )
 
 func main() {
@@ -142,4 +143,5 @@ func main() {
 	})*/
 
 	r.Run() // listen and serve on 0.0.0.0:8080
+	appengine.Main()
 }
