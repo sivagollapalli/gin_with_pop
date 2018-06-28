@@ -3,9 +3,10 @@ package actions
 import (
 	"log"
 
+	"gin_with_pop/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/pop"
-	"github.com/sivagollapalli/gin_with_pop/models"
 )
 
 func CreateUser(c *gin.Context) {

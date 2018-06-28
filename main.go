@@ -4,10 +4,12 @@ import (
 	"log"
 	"time"
 
+	"gin_with_pop/actions"
+
+	"gin_with_pop/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/pop"
-	"github.com/sivagollapalli/gin_with_pop/actions"
-	"github.com/sivagollapalli/gin_with_pop/models"
 
 	"gopkg.in/appleboy/gin-jwt.v2"
 )
