@@ -1,4 +1,5 @@
 require 'mina/git'
+require 'mina/rails'
 # require 'mina/rbenv'  # for rbenv support. (https://rbenv.org)
 # require 'mina/rvm'    # for rvm support. (https://rvm.io)
 
@@ -10,7 +11,7 @@ require 'mina/git'
 
 set :application_name, 'golangdemo'
 set :domain, '35.200.175.136'
-set :deploy_to, '/app/staging'
+set :deploy_to, '/home/siva_g/app/staging'
 set :repository, 'git@github.com:sivagollapalli/gin_with_pop.git'
 set :branch, 'master'
 set :user, 'siva_g'

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.3
+-- Dumped from database version 9.6.6
 -- Dumped by pg_dump version 9.6.1
 
 SET statement_timeout = 0;
@@ -74,6 +74,16 @@ ALTER TABLE ONLY users
 --
 
 CREATE UNIQUE INDEX version_idx ON schema_migration USING btree (version);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: cloudsqlsuperuser
+--
+
+REVOKE ALL ON SCHEMA public FROM cloudsqladmin;
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO cloudsqlsuperuser;
+GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
