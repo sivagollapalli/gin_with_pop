@@ -4,10 +4,6 @@ import (
 	"log"
 	"time"
 
-	"gin_with_pop/actions"
-
-	"gin_with_pop/models"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/pop"
 
@@ -35,7 +31,7 @@ func main() {
 		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
 			log.Println(userId)
 			log.Println(password)
-			user := models.User{}
+			user := User{}
 			log.Println(userId)
 			log.Println(password)
 
@@ -88,10 +84,10 @@ func main() {
 
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
-		auth.POST("/users", actions.CreateUser)
-		auth.GET("/users", actions.ListUsers)
-		auth.GET("/users/:id", actions.ShowUser)
-		auth.PATCH("/users/:id", actions.UpdateUser)
+		auth.POST("/users", CreateUser)
+		auth.GET("/users", ListUsers)
+		auth.GET("/users/:id", ShowUser)
+		auth.PATCH("/users/:id", UpdateUser)
 	}
 
 	/*r.POST("/users/sign_in", func(c *gin.Context) {
