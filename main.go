@@ -1,12 +1,13 @@
 package main
 
 import (
+	"gin_with_pop/actions"
+	"gin_with_pop/models"
 	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/pop"
-
 	"gopkg.in/appleboy/gin-jwt.v2"
 )
 
@@ -31,7 +32,7 @@ func main() {
 		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
 			log.Println(userId)
 			log.Println(password)
-			user := User{}
+			user := models.User{}
 			log.Println(userId)
 			log.Println(password)
 
@@ -84,10 +85,10 @@ func main() {
 
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
-		auth.POST("/users", CreateUser)
-		auth.GET("/users", ListUsers)
-		auth.GET("/users/:id", ShowUser)
-		auth.PATCH("/users/:id", UpdateUser)
+		auth.POST("/users", actions.CreateUser)
+		auth.GET("/users", actions.ListUsers)
+		auth.GET("/users/:id", actions.ShowUser)
+		auth.PATCH("/users/:id", actions.UpdateUser)
 	}
 
 	/*r.POST("/users/sign_in", func(c *gin.Context) {
@@ -141,5 +142,5 @@ func main() {
 		}
 	})*/
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

@@ -1,6 +1,7 @@
-package main
+package actions
 
 import (
+	"gin_with_pop/models"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func CreateUser(c *gin.Context) {
 	if err != nil {
 		log.Panic(err)
 	}
-	user := User{
+	user := models.User{
 		Name:  c.Query("name"),
 		Email: c.Query("email")}
 
@@ -47,7 +48,7 @@ func ListUsers(c *gin.Context) {
 
 	db, _ := pop.Connect("development")
 	query := db.RawQuery("select id, name, email from users")
-	users := []User{}
+	users := []models.User{}
 	err := query.All(&users)
 
 	if err != nil {
@@ -60,7 +61,7 @@ func ListUsers(c *gin.Context) {
 func ShowUser(c *gin.Context) {
 	db, _ := pop.Connect("development")
 	id := c.Param("id")
-	user := User{}
+	user := models.User{}
 	if err := db.Find(&user, id); err != nil {
 		log.Println(err)
 		c.JSON(422, gin.H{"error": "user doesnt exists"})
@@ -72,7 +73,7 @@ func ShowUser(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 	db, _ := pop.Connect("development")
 	id := c.Param("id")
-	user := User{}
+	user := models.User{}
 	if err := db.Find(&user, id); err != nil {
 		log.Println(err)
 		c.JSON(422, gin.H{"error": "user doesnt exists"})
