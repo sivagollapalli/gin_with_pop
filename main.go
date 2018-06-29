@@ -4,6 +4,7 @@ import (
 	"gin_with_pop/actions"
 	"gin_with_pop/models"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,12 +12,27 @@ import (
 	"gopkg.in/appleboy/gin-jwt.v2"
 )
 
+func init() {
+	if os.Getenv("GO_ENV") == "" {
+		os.Setenv("GO_ENV", "development")
+	}
+	_, err := pop.Connect(os.Getenv("GO_ENV"))
+
+	if err != nil {
+		log.Fatal("Unable to connect to db server")
+	}
+}
+
 func main() {
 	r := gin.New()
+
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
 	pop.Debug = true
-	db, _ := pop.Connect("development")
+
+	log.Println(os.Getenv("GO_ENV"))
+	db, _ := pop.Connect(os.Getenv("GO_ENV"))
 
 	authMiddleware := &jwt.GinJWTMiddleware{
 		Realm:            "test zone",
@@ -30,11 +46,7 @@ func main() {
 			return claims
 		},
 		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
-			log.Println(userId)
-			log.Println(password)
 			user := models.User{}
-			log.Println(userId)
-			log.Println(password)
 
 			query := db.RawQuery("select * from users where email = ?", userId)
 
@@ -91,56 +103,5 @@ func main() {
 		auth.PATCH("/users/:id", actions.UpdateUser)
 	}
 
-	/*r.POST("/users/sign_in", func(c *gin.Context) {
-		user := models.User{}
-		email := c.Query("email")
-		query := db.RawQuery("select * from users where email = ?", email)
-
-		if err := query.First(&user); err != nil {
-			log.Println(err)
-			c.JSON(422, gin.H{"error": "User doesn't exists"})
-			return
-		}
-
-		if user.Authenticate(c.Query("password")) {
-			log.Println(user)
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-				"identifier": user.ID,
-				"email":      user.Email})
-			tokenString, error := token.SignedString([]byte("secret"))
-
-			if error != nil {
-				fmt.Println(error)
-			}
-			c.JSON(200, gin.H{
-				"msg":   "login success",
-				"token": tokenString})
-		} else {
-			c.JSON(422, gin.H{"msg": "login fail"})
-		}
-	})
-
-	r.GET("/verify", func(c *gin.Context) {
-		tokenParam := c.Query("token")
-
-		token, _ := jwt.Parse(tokenParam, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("There was an error")
-			}
-			return []byte("secret"), nil
-		})
-
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			var user models.User
-			mapstructure.Decode(claims, &user)
-			log.Println(user)
-			c.JSON(200, gin.H{
-				"id":    user.Identifier,
-				"email": user.Email})
-		} else {
-			c.JSON(422, gin.H{"msg": "Invalid authorization token"})
-		}
-	})*/
-
-	r.Run(":8080") // listen and serve on 0.0.0.0:8080
+	r.Run(":3001") // listen and serve on 0.0.0.0:8080
 }
