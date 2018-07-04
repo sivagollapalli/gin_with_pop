@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/pop"
-	"gopkg.in/appleboy/gin-jwt.v2"
+	jwt "gopkg.in/appleboy/gin-jwt.v2"
 )
 
 func init() {
@@ -97,6 +97,8 @@ func main() {
 
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
+
+		r.POST("/users/upload", actions.ImageUpload)
 		auth.POST("/users", actions.CreateUser)
 		auth.GET("/users", actions.ListUsers)
 		auth.GET("/users/:id", actions.ShowUser)
